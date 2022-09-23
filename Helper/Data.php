@@ -3,7 +3,7 @@
 namespace Blue\Express\Helper;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Framework\App\Helper\AbstractHelper;  
+use Magento\Framework\App\Helper\AbstractHelper;
 
 /**
  * Class Data
@@ -12,20 +12,20 @@ use Magento\Framework\App\Helper\AbstractHelper;
  */
 class Data extends AbstractHelper
 {
-    
+
     /**
      * @var ScopeConfigInterface
      */
-    protected $_scopeConfig;   
+    protected $_scopeConfig;
 
      /**
      * Data constructor.
-     * @param ScopeConfigInterface $scopeConfig   
+     * @param ScopeConfigInterface $scopeConfig
      */
-    public function __construct( 
+    public function __construct(
         ScopeConfigInterface $scopeConfig
-    ) { 
-        $this->_scopeConfig  = $scopeConfig; 
+    ) {
+        $this->_scopeConfig  = $scopeConfig;
     }
 
     /**
@@ -47,9 +47,40 @@ class Data extends AbstractHelper
     /**
      * @return string
      */
+    public function getBxapiKey()
+    {
+        return $this->_scopeConfig->getValue('carriers/bluexpress/bxapiKey', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+    }
+
+    /**
+     * @return string
+     */
     public function getToken()
     {
         return $this->_scopeConfig->getValue('carriers/bluexpress/token', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
     }
 
+    /**
+     * @return string
+     */
+    public function getWebHook()
+    {
+        return $this->_scopeConfig->getValue('carriers/bluexpress/webhook', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+    }
+
+    /**
+     * @return string
+     */
+    public function getKeyWebhook()
+    {
+        return $this->_scopeConfig->getValue('carriers/bluexpress/keywebhook', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+    }
+
+    public function getWeightUnit()
+    {
+        return $this->_scopeConfig->getValue(
+            'general/locale/weight_unit',
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+        );
+    }
 }

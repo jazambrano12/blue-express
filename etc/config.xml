@@ -5,7 +5,10 @@
             <bluexpress>
                 <clientaccount></clientaccount>
                 <usercode></usercode>
+		<bxapiKey></bxapiKey>
                 <token></token> 
+		<webhook></webhook>
+		<keywebhook></keywebhook>
             </bluexpress> 
             <bxprioritario>
                 <active>0</active>

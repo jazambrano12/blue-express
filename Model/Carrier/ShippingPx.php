@@ -167,16 +167,12 @@ class ShippingPx extends AbstractCarrier implements CarrierInterface
                 $blueAncho = (int) $_product->getResource()
                     ->getAttributeRawValue($_product->getId(), 'ancho', $_product->getStoreId()); 
 
-                $itemProduct = [
-                    "producto" => "P",
-                    "familiaProducto" => "PAQU",
+                $itemProduct[] = [
                     'largo'         => $blueAlto,
                     'ancho'         => $blueAncho,
                     'alto'          => $blueLargo,
                     'pesoFisico'    => $_product->getWeight(),
-                    'cantidadPiezas' => $_item->getQty(),
-                    "unidades" => 1
-                    
+                    'cantidadPiezas' => $_item->getQty()
                 ];
         }
 
@@ -194,7 +190,11 @@ class ShippingPx extends AbstractCarrier implements CarrierInterface
                     "from" => [ "country" => "{$countryID}", "district" => "{$cityOrigin['district']}" ],
                     "to" => [ "country" => "{$countryID}", "state" => "{$citydest['code']}", "district" => "{$citydest['district']}" ],
                     "serviceType" => "EX",
-                    "datosProducto" => $itemProduct
+                    "datosProducto" => [
+                        "producto" => "P",
+                        "familiaProducto" => "PAQU",
+                        "bultos" =>$itemProduct
+                    ]
                 ];
 
                 $costoEnvio = $blueservice->getBXCosto($seteoDatos);    
@@ -203,18 +203,26 @@ class ShippingPx extends AbstractCarrier implements CarrierInterface
                 * Formateamos los datos del JSON String
                 */
                 $json = json_decode($costoEnvio,true);
+		$costo = 1;
 
                 foreach ($json as $key => $datos){
                     if($key == 'data'){ 
-                        $method->setPrice((int)$datos['total']);
-                        $method->setCost((int)$datos['total']);
-                    } 
-                    
+                        if(is_array($datos)){ 
+			   $method->setPrice((int)$datos['total']);
+                           $method->setCost((int)$datos['total']);
+			}else{
+                            $costo = -1;
+                        }
+                    }
                 }
-                
+
                 $result->append($method);
 
-                return $result;
+                if($costo != -1){
+                    return $result;
+                }else{
+                    return false;
+                }
 
             }else{
                 return false;

@@ -5,9 +5,9 @@ namespace Blue\Express\Model\Carrier;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use Magento\Shipping\Model\Rate\Result;
 use Magento\Shipping\Model\Carrier\AbstractCarrier;
-use Magento\Shipping\Model\Carrier\CarrierInterface; 
+use Magento\Shipping\Model\Carrier\CarrierInterface;
 use Blue\Express\Model\Blueservice;
-use Magento\Store\Model\ScopeInterface; 
+use Magento\Store\Model\ScopeInterface;
 
 /**
  * Custom shipping model
@@ -22,12 +22,12 @@ class ShippingEx extends AbstractCarrier implements CarrierInterface
     /**
      * @var string
      */
-    protected $_code = 'bxexpress'; 
+    protected $_code = 'bxexpress';
 
     /**
      * @var
      */
-    protected $_blueservice; 
+    protected $_blueservice;
 
     /**
      * @var bool
@@ -47,14 +47,14 @@ class ShippingEx extends AbstractCarrier implements CarrierInterface
     /**
      * @var RequestInterface
      */
-    protected $_request; 
+    protected $_request;
 
     /**
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
      * @param \Magento\Quote\Model\Quote\Address\RateResult\ErrorFactory $rateErrorFactory
      * @param \Psr\Log\LoggerInterface $logger
      * @param \Magento\Shipping\Model\Rate\ResultFactory $rateResultFactory
-     * @param \Magento\Quote\Model\Quote\Address\RateResult\MethodFactory $rateMethodFactory  
+     * @param \Magento\Quote\Model\Quote\Address\RateResult\MethodFactory $rateMethodFactory
      * @param \Magento\Framework\App\RequestInterface $request
      * @param Blueservice $blueservice
      * @param array $data
@@ -66,17 +66,16 @@ class ShippingEx extends AbstractCarrier implements CarrierInterface
         \Magento\Shipping\Model\Rate\ResultFactory $rateResultFactory,
         \Magento\Quote\Model\Quote\Address\RateResult\MethodFactory $rateMethodFactory,
         \Magento\Framework\App\RequestInterface $request,
-        Blueservice $blueservice,  
+        Blueservice $blueservice,
         array $data = []
     ) {
-        $this->_blueservice       = $blueservice; 
+        $this->_blueservice       = $blueservice;
         $this->rateResultFactory  = $rateResultFactory;
-        $this->rateMethodFactory  = $rateMethodFactory; 
+        $this->rateMethodFactory  = $rateMethodFactory;
         $this->_request           = $request;
         $this->scopeConfig        = $scopeConfig;
 
-        parent::__construct($scopeConfig, $rateErrorFactory, $logger, $data); 
-        
+        parent::__construct($scopeConfig, $rateErrorFactory, $logger, $data);
     }
 
     /**
@@ -89,7 +88,7 @@ class ShippingEx extends AbstractCarrier implements CarrierInterface
 
     /**
      * Is City required
-     * 
+     *
      * @return bool
      */
     public function isCityRequired(){
@@ -120,7 +119,7 @@ class ShippingEx extends AbstractCarrier implements CarrierInterface
         }
 
         $errorTitle = __('No existe cotizaciones para la comuna ingresada');
-        $blueservice = $this->_blueservice; 
+        $blueservice = $this->_blueservice;
 
         /** @var \Magento\Shipping\Model\Rate\Result $result */
         $result = $this->rateResultFactory->create();
@@ -131,17 +130,17 @@ class ShippingEx extends AbstractCarrier implements CarrierInterface
         $method->setCarrier($this->_code);
         $method->setCarrierTitle($this->getConfigData('title'));
 
-        $method->setMethod($this->_code);  
-        $method->setMethodTitle($this->getConfigData('name'));  
-        
+        $method->setMethod($this->_code);
+        $method->setMethodTitle($this->getConfigData('name'));
+
         /**
          * Obtenemos el ID del contry seleccionado en la tienda
          */
-        $countryID = $this->getCountryByWebsite(); 
+        $countryID = $this->getCountryByWebsite();
         /**
         * Busco el ID correspondiente a la comuna seleccionada en admin
         */
-        $storeCity = $this->scopeConfig->getValue('general/store_information/city',ScopeInterface::SCOPE_STORE); 
+        $storeCity = $this->scopeConfig->getValue('general/store_information/city',ScopeInterface::SCOPE_STORE);
         $cityOrigin= $blueservice->getGeolocation("{$storeCity}");
 
         /**
@@ -165,25 +164,21 @@ class ShippingEx extends AbstractCarrier implements CarrierInterface
                     ->getAttributeRawValue($_product->getId(), 'largo', $_product->getStoreId());
 
                 $blueAncho = (int) $_product->getResource()
-                    ->getAttributeRawValue($_product->getId(), 'ancho', $_product->getStoreId()); 
+                    ->getAttributeRawValue($_product->getId(), 'ancho', $_product->getStoreId());
 
-                $itemProduct = [
-                    "producto" => "P",
-                    "familiaProducto" => "PAQU",
+                $itemProduct[] = [
                     'largo'         => $blueAlto,
                     'ancho'         => $blueAncho,
                     'alto'          => $blueLargo,
                     'pesoFisico'    => $_product->getWeight(),
-                    'cantidadPiezas' => $_item->getQty(),
-                    "unidades" => 1
-                    
+                    'cantidadPiezas' => $_item->getQty()
                 ];
         }
-         
+
         /**
          * Busco el ID correspondiente a la comuna seleccionada en el checkout
-         */ 
-        $addressCity = $request->getDestCity(); 
+         */
+        $addressCity = $request->getDestCity();
         if($addressCity !=''){
             $citydest= $blueservice->getGeolocation("{$addressCity}");
             if($citydest){
@@ -194,34 +189,44 @@ class ShippingEx extends AbstractCarrier implements CarrierInterface
                     "from" => [ "country" => "{$countryID}", "district" => "{$cityOrigin['district']}" ],
                     "to" => [ "country" => "{$countryID}", "state" => "{$citydest['code']}", "district" => "{$citydest['district']}" ],
                     "serviceType" => "EX",
-                    "datosProducto" => $itemProduct
+                    "datosProducto" => [
+                        "producto" => "P",
+                        "familiaProducto" => "PAQU",
+                        "bultos" =>$itemProduct
+                    ]
                 ];
-                 
-                $costoEnvio = $blueservice->getBXCosto($seteoDatos);    
+
+                $costoEnvio = $blueservice->getBXCosto($seteoDatos);
 
                 /*
                 * Formateamos los datos del JSON String
                 */
                 $json = json_decode($costoEnvio,true);
-
+		$costo = 1;
                 foreach ($json as $key => $datos){
-                    if($key == 'data'){ 
-                        $method->setPrice((int)$datos['total']);
-                        $method->setCost((int)$datos['total']);
-                    } 
-                    
+                    if($key == 'data'){
+                        if(is_array($datos)){
+                            $method->setPrice((int)$datos['total']);
+			    $method->setCost((int)$datos['total']);
+                        }else{
+                            $costo = -1;
+                        }
+                    }
                 }
-                
+
                 $result->append($method);
 
-                return $result;
-
+                if($costo != -1){
+                    return $result;
+                }else{
+                    return false;
+                }
             }else{
                 return false;
             }
         }else{
             return false;
-        } 
+        }
     }
 
     /**
