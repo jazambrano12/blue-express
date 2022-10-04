@@ -1,5 +1,5 @@
 {
-    "name": "blue/express",
+    "name": "blue-express/shipping-b-x",
     "description": "N/A",
     "require": {
         "php": "~7.4.0||~8.1.0",
