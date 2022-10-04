@@ -119,7 +119,7 @@ class ShippingPt extends AbstractCarrier implements CarrierInterface
             return false;
         }
 
-        $errorTitle = __('No existe cotizaciones para la comuna ingresada');
+        $errorTitle = __('There are no quotes for the commune entered');
         $blueservice = $this->_blueservice; 
 
         /** @var \Magento\Shipping\Model\Rate\Result $result */
@@ -135,17 +135,17 @@ class ShippingPt extends AbstractCarrier implements CarrierInterface
         $method->setMethodTitle($this->getConfigData('name'));  
         
         /**
-         * Obtenemos el ID del contry seleccionado en la tienda
+         * We get the ID of the country selected in the store
          */
         $countryID = $this->getCountryByWebsite(); 
         /**
-        * Busco el ID correspondiente a la comuna seleccionada en admin
+        * I look for the ID corresponding to the commune selected in admin
         */
         $storeCity = $this->scopeConfig->getValue('general/store_information/city',ScopeInterface::SCOPE_STORE); 
         $cityOrigin= $blueservice->getGeolocation("{$storeCity}");
 
         /**
-         * Obtengo los datos del producto
+         * I get the product data
          */
         $itemProduct = [];
 
@@ -172,24 +172,24 @@ class ShippingPt extends AbstractCarrier implements CarrierInterface
                     'ancho'         => $blueAncho,
                     'alto'          => $blueLargo,
                     'pesoFisico'    => $_product->getWeight(),
-                    'cantidadPiezas' => $_item->getQty()
+                    'cantidad'      => $_item->getQty()
                 ];
         }
 
         /**
-         * Busco el ID correspondiente a la comuna seleccionada en el checkout
+         * I look for the ID corresponding to the commune selected at checkout
          */ 
         $addressCity = $request->getDestCity(); 
         if($addressCity !=''){
             $citydest= $blueservice->getGeolocation("{$addressCity}");
             if($citydest){
                 /**
-                * GENERO EL ARRAY PARA PASARSELO AL API QUE BUSCARA EL PRECIO
+                * I GENERATE THE ARRAY TO PASS IT TO THE API THAT WILL LOOK FOR THE PRICE
                 */
                 $seteoDatos = [
                     "from" => [ "country" => "{$countryID}", "district" => "{$cityOrigin['district']}" ],
                     "to" => [ "country" => "{$countryID}", "state" => "{$citydest['code']}", "district" => "{$citydest['district']}" ],
-                    "serviceType" => "EX",
+                    "serviceType" => "PY",
                     "datosProducto" => [
                         "producto" => "P",
                         "familiaProducto" => "PAQU",
@@ -200,21 +200,24 @@ class ShippingPt extends AbstractCarrier implements CarrierInterface
                 $costoEnvio = $blueservice->getBXCosto($seteoDatos);    
 
                 /*
-                * Formateamos los datos del JSON String
+                * We format the data of the JSON String
                 */
                 $json = json_decode($costoEnvio,true);
-		$costo = 1;
-
+		        $costo = 1;
                 foreach ($json as $key => $datos){
                     if($key == 'data'){
                         if(is_array($datos)){
-			    $method->setPrice((int)$datos['total']);
-                            $method->setCost((int)$datos['total']);
-			}else{
+                            if($datos['total'] != '' && $datos['total'] != 0){
+                                $method->setPrice((int)$datos['total']);
+                                $method->setCost((int)$datos['total']);
+                            }else{
+                                $costo = -1;
+                            }
+                            
+                        }else{
                             $costo = -1;
                         }
                     }
-
                 }
 
                 $result->append($method);

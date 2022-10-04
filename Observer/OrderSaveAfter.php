@@ -40,78 +40,78 @@ class OrderSaveAfter implements ObserverInterface
     ){
         $this->_storeManager = $storeManager;
         $this->_blueservice = $blueservice;
-	$this->_weigthStore = $helperBX->getWeightUnit();
+	    $this->_weigthStore = $helperBX->getWeightUnit();
         $this->logger = $logger;
     }
 
     public function execute(Observer $observer)
     {
         /**
-         * Envio los datos de conexion a Blue Express
+         * I send the connection data to Blue Express
          */
         $orderID        = $observer->getEvent()->getOrder()->getId();
         $incrementId    = $observer->getEvent()->getOrder()->getIncrementId();
         $status         = $observer->getEvent()->getOrder()->getStatus();
         $state          = $observer->getEvent()->getOrder()->getState();
-	$weight_uni 	= $this->_weigthStore;
+	    $weight_uni 	= $this->_weigthStore;
 
         /**
-         * OBTENDO EL DETALLE DE LA ORDEN
+         * OBTAINING THE DETAIL OF THE ORDER
          */
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
         $orders = $objectManager->create('Magento\Sales\Model\Order')->load($orderID);
         $detailOrder = $orders->getData();
-	$shipping = $orders->getShippingAddress();
-      If($shipping && $shipping->getEntityId()){
-        $shippingAddress = [
-            "entity_id"=> $shipping->getEntityID(),
-            "parent_id"=> $shipping->getParentId(),
-            "quote_address_id"=> $shipping->getQuoteAddressId(),
-            "region_id"=> $shipping->getRegionId(),
-            "region"=> $shipping->getRegion(),
-            "postcode"=> $shipping->getPostCode(),
-            "lastname"=> $shipping->getLastname(),
-            "street"=> $shipping->getStreet(),
-            "city"=> $shipping->getCity(),
-            "email"=> $shipping->getEmail(),
-            "telephone"=> $shipping->getTelephone(),
-            "country_id"=> $shipping->getCountryId(),
-            "firstname"=> $shipping->getFirstname(),
-            "address_type"=> $shipping->getAddressType(),
-            "company"=> $shipping->getCompany()
-        ];
-        $billing = $orders->getBillingAddress();
-        $billingAddress = [
-            "entity_id"=> $billing->getEntityID(),
-            "parent_id"=> $billing->getParentId(),
-            "quote_address_id"=> $billing->getQuoteAddressId(),
-            "region_id"=> $billing->getRegionId(),
-            "region"=> $billing->getRegion(),
-            "postcode"=> $billing->getPostCode(),
-            "lastname"=> $billing->getLastname(),
-            "street"=> $billing->getStreet(),
-            "city"=> $billing->getCity(),
-            "email"=> $billing->getEmail(),
-            "telephone"=> $billing->getTelephone(),
-            "country_id"=> $billing->getCountryId(),
-            "firstname"=> $billing->getFirstname(),
-            "address_type"=> $billing->getAddressType(),
-            "company"=> $billing->getCompany()
-        ];
-    }
-	$ProductDetail = array();
+	    $shipping = $orders->getShippingAddress();
+        If($shipping && $shipping->getEntityId()){
+            $shippingAddress = [
+                "entity_id"=> $shipping->getEntityID(),
+                "parent_id"=> $shipping->getParentId(),
+                "quote_address_id"=> $shipping->getQuoteAddressId(),
+                "region_id"=> $shipping->getRegionId(),
+                "region"=> $shipping->getRegion(),
+                "postcode"=> $shipping->getPostCode(),
+                "lastname"=> $shipping->getLastname(),
+                "street"=> $shipping->getStreet(),
+                "city"=> $shipping->getCity(),
+                "email"=> $shipping->getEmail(),
+                "telephone"=> $shipping->getTelephone(),
+                "country_id"=> $shipping->getCountryId(),
+                "firstname"=> $shipping->getFirstname(),
+                "address_type"=> $shipping->getAddressType(),
+                "company"=> $shipping->getCompany()
+            ];
+            $billing = $orders->getBillingAddress();
+            $billingAddress = [
+                "entity_id"=> $billing->getEntityID(),
+                "parent_id"=> $billing->getParentId(),
+                "quote_address_id"=> $billing->getQuoteAddressId(),
+                "region_id"=> $billing->getRegionId(),
+                "region"=> $billing->getRegion(),
+                "postcode"=> $billing->getPostCode(),
+                "lastname"=> $billing->getLastname(),
+                "street"=> $billing->getStreet(),
+                "city"=> $billing->getCity(),
+                "email"=> $billing->getEmail(),
+                "telephone"=> $billing->getTelephone(),
+                "country_id"=> $billing->getCountryId(),
+                "firstname"=> $billing->getFirstname(),
+                "address_type"=> $billing->getAddressType(),
+                "company"=> $billing->getCompany()
+            ];
+        }
+	    $ProductDetail = array();
 	    foreach( $orders->getAllVisibleItems() as $item ) {
 	        $ProductDetail[] = $item->getData();
 	    }
 
         /**
-         * OBTENDO LA BASE URL DE LA TIENDA
+         * GETTING THE STORE URL BASE
          */
         $storeManager = $this->_storeManager;
         $baseUrl = $storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB);
 
         /**
-         * ME CONECTO AL SERVICIO PARA ENVIAR POR EL WEBHOOK
+         * I CONNECT TO THE SERVICE TO SEND THROUGH THE WEBHOOK
          */
         $blueservice    = $this->_blueservice;
 
@@ -119,19 +119,18 @@ class OrderSaveAfter implements ObserverInterface
             $pedido = [
                     "OrderId"       => $orderID,
                     "IncrementId"   => $incrementId,
-		    "tipoPeso"      => $weight_uni,
+                    "tipoPeso"      => $weight_uni,
                     "DetailOrder"   => $detailOrder,
-		    "Shipping" 	    => $shippingAddress,
-		    "Billing"	    => $billingAddress,
-		    "Product" 	    => $ProductDetail,
-		    "Origin"=>[
-			"Account" => $baseUrl
-		    ]
-                ];
+                    "Shipping" 	    => $shippingAddress,
+                    "Billing"	    => $billingAddress,
+                    "Product" 	    => $ProductDetail,
+                    "Origin"=>[
+                    "Account" => $baseUrl
+                    ]
+            ];
 
-	    $this->logger->info('Información enviada al webhook',['Detalle' => $pedido]);
+	        $this->logger->info('Information sent to the webhook',['Detalle' => $pedido]);
             $respuestaWebhook = $blueservice->getBXOrder($pedido);
-            //$this->logger->info('Send order Bx',['Id de la orden' => $orderID,'enviado al webhook'=>$pedido]);
        }
     }
 }

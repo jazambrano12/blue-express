@@ -17,7 +17,7 @@ class Blueservice
      /**
      * @var string
      */
-    protected $apiUrl =  'https://bx-tracking.bluex.cl/bx-pricing/v1';
+    protected $apiUrl =  'https://apigw.bluex.cl/api/legacy/pricing/v1';
 
     /**
      * @var string
@@ -70,14 +70,14 @@ class Blueservice
     ) {
         $this->_helper = $helperBX;
         $this->curl = $curl;
-	$this->logger = $logger;
+	    $this->logger = $logger;
 
         $this->_clientaccount = $helperBX->getClientAccount();
         $this->_usercode = $helperBX->getUserCode();
-	$this->_bxapiKey = $helperBX->getBxapiKey();
+	    $this->_bxapiKey = $helperBX->getBxapiKey();
         $this->_token = $helperBX->getToken();
-	$this->_webhook = $helperBX->getWebHook();
-	$this->_keywebhook = $helperBX->getKeyWebHook();
+	    $this->_webhook = $helperBX->getWebHook();
+	    $this->_keywebhook = $helperBX->getKeyWebHook();
     }
 
     /**
@@ -103,7 +103,7 @@ class Blueservice
      */
     public function getBXCosto($shippingParams)
     {
-	    $this->logger->info('Info enviada  al api precio',$shippingParams);
+	    $this->logger->info('Information sent to api price',$shippingParams);
 
             $headers = [
                 "Content-Type" => "application/json",
@@ -112,7 +112,7 @@ class Blueservice
                 "BX-TOKEN" => "{$this->_token}"
             ];
             $this->curl->setHeaders($headers);
-            $this->curl->post("https://qaapigw.bluex.cl/api/legacy/pricing/v1", json_encode($shippingParams));
+            $this->curl->post("{$apiUrl}", json_encode($shippingParams));
             $result = $this->curl->getBody();
 
         return $result;
@@ -146,7 +146,7 @@ class Blueservice
         for($i=0; $i < count($data); $i++){
             for($j=0; $j < count($data[$i]['ciudades']); $j++){
                 /**
-                 * Buscamo los datos de la comuna seleccionada
+                 * We look for the data of the selected commune
                  */
                 if( $data[$i]['ciudades'][$j]['name'] == strtoupper($shippingCity) ){
                     $city = array("code"=>$data[$i]['code'],"district"=>$data[$i]['ciudades'][$j]['defaultDistrict']);
