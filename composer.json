@@ -2,7 +2,7 @@
     "name": "blue/express",
     "description": "N/A",
     "require": {
-        "php": "~8.1.0",
+        "php": ">=8.1.0",
         "magento/framework": "102.0.*",
         "magento/module-backend": "101.0.*",
         "magento/module-catalog": "103.0.*",
