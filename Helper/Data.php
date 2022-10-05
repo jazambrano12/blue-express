@@ -52,6 +52,22 @@ class Data extends AbstractHelper
         return $this->_scopeConfig->getValue('carriers/bluexpress/bxapiKey', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
     }
 
+     /**
+     * @return string
+     */
+    public function getBxapiGeo()
+    {
+        return $this->_scopeConfig->getValue('carriers/bluexpress/bxurlgeo', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+    }
+
+     /**
+     * @return string
+     */
+    public function getBxapiPrice()
+    {
+        return $this->_scopeConfig->getValue('carriers/bluexpress/bxurlprice', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+    }
+    
     /**
      * @return string
      */

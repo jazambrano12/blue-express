@@ -10,14 +10,14 @@ class Blueservice
 
 {
     /**
-     * Get country path
+     * @var string
      */
-    const GEOLOCATION_URL = 'https://bx-tracking.bluex.cl/bx-geo/states';
+    protected $_apiUrlGeo;
 
      /**
      * @var string
      */
-    protected $apiUrl =  'https://apigw.bluex.cl/api/legacy/pricing/v1';
+    protected $_apiUrlPrice;
 
     /**
      * @var string
@@ -75,6 +75,8 @@ class Blueservice
         $this->_clientaccount = $helperBX->getClientAccount();
         $this->_usercode = $helperBX->getUserCode();
 	    $this->_bxapiKey = $helperBX->getBxapiKey();
+        $this->_apiUrlGeo = $helperBX->getBxapiGeo();
+        $this->_apiUrlPrice = $helperBX->getBxapiPrice();
         $this->_token = $helperBX->getToken();
 	    $this->_webhook = $helperBX->getWebHook();
 	    $this->_keywebhook = $helperBX->getKeyWebHook();
@@ -112,7 +114,7 @@ class Blueservice
                 "BX-TOKEN" => "{$this->_token}"
             ];
             $this->curl->setHeaders($headers);
-            $this->curl->post("{$apiUrl}", json_encode($shippingParams));
+            $this->curl->post("{$this->_apiUrlPrice}", json_encode($shippingParams));
             $result = $this->curl->getBody();
 
         return $result;
@@ -134,7 +136,7 @@ class Blueservice
             "BX-TOKEN" => "{$this->_token}"
         ];
         $this->curl->setHeaders($headers);
-        $this->curl->get(self::GEOLOCATION_URL);
+        $this->curl->get("{$this->_apiUrlGeo}");
 
         $result = $this->curl->getBody();
 

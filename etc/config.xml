@@ -5,27 +5,29 @@
             <bluexpress>
                 <clientaccount></clientaccount>
                 <usercode></usercode>
-		<bxapiKey></bxapiKey>
+                <bxapiKey></bxapiKey>
+                <bxurlgeo></bxurlgeo>
+                <bxurlprice></bxurlprice>
                 <token></token> 
-		<webhook></webhook>
-		<keywebhook></keywebhook>
+                <webhook></webhook>
+                <keywebhook></keywebhook> 
             </bluexpress> 
             <bxprioritario>
                 <active>0</active>
-                <title>Custom Shipping Title</title>
-                <name>Custom Shipping Method Name</name> 
+                <title>Blue Express - PT </title>
+                <name>Blue Express - PT </name> 
                 <model>Blue\Express\Model\Carrier\ShippingPt</model>
             </bxprioritario> 
             <bxexpress>
                 <active>0</active> 
-                <title>Custom Shipping Title</title>
-                <name>Custom Shipping Method Name</name> 
+                <title>Blue Express - EX </title>
+                <name>Blue Express - EX </name> 
                 <model>Blue\Express\Model\Carrier\ShippingEx</model>
             </bxexpress> 
              <bxPremium>
                 <active>0</active> 
-                <title>Custom Shipping Title</title>
-                <name>Custom Shipping Method Name</name> 
+                <title>Blue Express - PY </title>
+                <name>Blue Express - PY</name> 
                 <model>Blue\Express\Model\Carrier\ShippingPx</model>
             </bxPremium> 
         </carriers> 

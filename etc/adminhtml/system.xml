@@ -12,7 +12,7 @@
                     <label>User Code</label>
                     <validate>required-entry</validate>
                 </field>
-		<field id="bxapiKey" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+		        <field id="bxapiKey" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Key Blue Express</label>
                     <validate>required-entry</validate>
                 </field>
@@ -20,11 +20,19 @@
                     <label>Token</label>
                     <validate>required-entry</validate>
                 </field>
-		<field id="webhook" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="bxurlgeo" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Url APi Geolocation Blue Express</label>
+                    <validate>required-entry</validate>
+                </field>
+                <field id="bxurlprice" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Url APi Pricing Blue Express</label>
+                    <validate>required-entry</validate>
+                </field> 
+		        <field id="webhook" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Url WebHook</label>
                     <validate>required-entry</validate>
                 </field>
-		<field id="keywebhook" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+		        <field id="keywebhook" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Api Key  WebHook</label>
                     <validate>required-entry</validate>
                 </field>
