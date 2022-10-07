@@ -4,7 +4,7 @@ use Magento\Framework\Component\ComponentRegistrar;
 
 ComponentRegistrar::register(
     ComponentRegistrar::MODULE,
-    'Blue_Express',
+    'BlueExpress_ShippingBX',
     __DIR__
 );
 

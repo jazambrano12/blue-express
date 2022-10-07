@@ -16,19 +16,19 @@
                 <active>0</active>
                 <title>Blue Express - PT </title>
                 <name>Blue Express - PT </name> 
-                <model>Blue\Express\Model\Carrier\ShippingPt</model>
+                <model>BlueExpress\ShippingBX\Model\Carrier\ShippingPt</model>
             </bxprioritario> 
             <bxexpress>
                 <active>0</active> 
                 <title>Blue Express - EX </title>
                 <name>Blue Express - EX </name> 
-                <model>Blue\Express\Model\Carrier\ShippingEx</model>
+                <model>BlueExpress\ShippingBX\Model\Carrier\ShippingEx</model>
             </bxexpress> 
              <bxPremium>
                 <active>0</active> 
                 <title>Blue Express - PY </title>
                 <name>Blue Express - PY</name> 
-                <model>Blue\Express\Model\Carrier\ShippingPx</model>
+                <model>BlueExpress\ShippingBX\Model\Carrier\ShippingPx</model>
             </bxPremium> 
         </carriers> 
     </default>

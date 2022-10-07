@@ -1,13 +1,13 @@
 <?php declare(strict_types=1);
 
-namespace Blue\Express\Observer;
+namespace BlueExpress\ShippingBX\Observer;
 
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Psr\Log\LoggerInterface;
 use Magento\Sales\Model\Order;
-use Blue\Express\Model\Blueservice;
-use Blue\Express\Helper\Data as HelperBX;
+use BlueExpress\ShippingBX\Model\Blueservice;
+use BlueExpress\ShippingBX\Helper\Data as HelperBX;
 
 class OrderSaveAfter implements ObserverInterface
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Blue\Express\Helper;
+namespace BlueExpress\ShippingBX\Helper;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Helper\AbstractHelper;
@@ -8,7 +8,7 @@ use Magento\Framework\App\Helper\AbstractHelper;
 /**
  * Class Data
  *
- * @package Blue\Express\Helper
+ * @package BlueExpress\ShippingBX\Helper
  */
 class Data extends AbstractHelper
 {

@@ -1,12 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace Blue\Express\Model\Carrier;
+namespace BlueExpress\ShippingBX\Model\Carrier;
 
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use Magento\Shipping\Model\Rate\Result;
 use Magento\Shipping\Model\Carrier\AbstractCarrier;
 use Magento\Shipping\Model\Carrier\CarrierInterface; 
-use Blue\Express\Model\Blueservice;
+use BlueExpress\ShippingBX\Model\Blueservice;
 use Magento\Store\Model\ScopeInterface; 
 
 /**

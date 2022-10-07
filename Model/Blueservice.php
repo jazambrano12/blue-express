@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Blue\Express\Model;
+namespace BlueExpress\ShippingBX\Model;
 
 use Magento\Checkout\Model\Session as CheckoutSession;
-use Blue\Express\Helper\Data as HelperBX;
+use BlueExpress\ShippingBX\Helper\Data as HelperBX;
 use Psr\Log\LoggerInterface;
 
 class Blueservice

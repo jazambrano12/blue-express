@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Blue\Express\Model\Resolver;
+namespace BlueExpress\ShippingBX\Model\Resolver;
 
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\GraphQl\Config\Element\Field;
