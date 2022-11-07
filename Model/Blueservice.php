@@ -88,18 +88,13 @@ class Blueservice
      */
     public function getBXOrder($datosParams)
     {
-        /*$headers = [
+        $headers = [
             "Content-Type" => "application/json",
             "apikey" => "{$this->_keywebhook}"
-        ];*/
-
-        $headers = [
-            "Content-Type" => "application/json"
         ];
 
         $this->curl->setHeaders($headers);
-        //$this->curl->post("{$this->_webhook}", json_encode($datosParams));
-        $this->curl->post("https://webhook.site/5dc275b5-8e01-42a4-a91b-b6a040795759", json_encode($datosParams));
+        $this->curl->post("{$this->_webhook}", json_encode($datosParams));
         $result = $this->curl->getBody();
 
         return $result;
