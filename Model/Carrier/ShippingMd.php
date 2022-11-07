@@ -5,14 +5,14 @@ namespace BlueExpress\ShippingBX\Model\Carrier;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use Magento\Shipping\Model\Rate\Result;
 use Magento\Shipping\Model\Carrier\AbstractCarrier;
-use Magento\Shipping\Model\Carrier\CarrierInterface; 
+use Magento\Shipping\Model\Carrier\CarrierInterface;
 use BlueExpress\ShippingBX\Model\Blueservice;
-use Magento\Store\Model\ScopeInterface; 
+use Magento\Store\Model\ScopeInterface;
 
 /**
  * Custom shipping model
  */
-class ShippingPx extends AbstractCarrier implements CarrierInterface
+class ShippingMd extends AbstractCarrier implements CarrierInterface
 {
     /**
      * Get country path
@@ -22,12 +22,12 @@ class ShippingPx extends AbstractCarrier implements CarrierInterface
     /**
      * @var string
      */
-    protected $_code = 'bxPremium'; 
+    protected $_code = 'bxsameday';
 
     /**
      * @var
      */
-    protected $_blueservice; 
+    protected $_blueservice;
 
     /**
      * @var bool
@@ -47,14 +47,14 @@ class ShippingPx extends AbstractCarrier implements CarrierInterface
     /**
      * @var RequestInterface
      */
-    protected $_request; 
+    protected $_request;
 
     /**
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
      * @param \Magento\Quote\Model\Quote\Address\RateResult\ErrorFactory $rateErrorFactory
      * @param \Psr\Log\LoggerInterface $logger
      * @param \Magento\Shipping\Model\Rate\ResultFactory $rateResultFactory
-     * @param \Magento\Quote\Model\Quote\Address\RateResult\MethodFactory $rateMethodFactory  
+     * @param \Magento\Quote\Model\Quote\Address\RateResult\MethodFactory $rateMethodFactory
      * @param \Magento\Framework\App\RequestInterface $request
      * @param Blueservice $blueservice
      * @param array $data
@@ -66,17 +66,16 @@ class ShippingPx extends AbstractCarrier implements CarrierInterface
         \Magento\Shipping\Model\Rate\ResultFactory $rateResultFactory,
         \Magento\Quote\Model\Quote\Address\RateResult\MethodFactory $rateMethodFactory,
         \Magento\Framework\App\RequestInterface $request,
-        Blueservice $blueservice,  
+        Blueservice $blueservice,
         array $data = []
     ) {
-        $this->_blueservice       = $blueservice; 
+        $this->_blueservice       = $blueservice;
         $this->rateResultFactory  = $rateResultFactory;
-        $this->rateMethodFactory  = $rateMethodFactory; 
+        $this->rateMethodFactory  = $rateMethodFactory;
         $this->_request           = $request;
         $this->scopeConfig        = $scopeConfig;
 
-        parent::__construct($scopeConfig, $rateErrorFactory, $logger, $data); 
-        
+        parent::__construct($scopeConfig, $rateErrorFactory, $logger, $data);
     }
 
     /**
@@ -89,7 +88,7 @@ class ShippingPx extends AbstractCarrier implements CarrierInterface
 
     /**
      * Is City required
-     * 
+     *
      * @return bool
      */
     public function isCityRequired(){
@@ -120,7 +119,7 @@ class ShippingPx extends AbstractCarrier implements CarrierInterface
         }
 
         $errorTitle = __('There are no quotes for the commune entered');
-        $blueservice = $this->_blueservice; 
+        $blueservice = $this->_blueservice;
 
         /** @var \Magento\Shipping\Model\Rate\Result $result */
         $result = $this->rateResultFactory->create();
@@ -131,18 +130,19 @@ class ShippingPx extends AbstractCarrier implements CarrierInterface
         $method->setCarrier($this->_code);
         $method->setCarrierTitle($this->getConfigData('title'));
 
-        $method->setMethod($this->_code);  
-        $method->setMethodTitle($this->getConfigData('name'));  
-        
+        $method->setMethod($this->_code);
+        $method->setMethodTitle($this->getConfigData('name'));
+
         /**
          * We get the ID of the country selected in the store
          */
-        $countryID = $this->getCountryByWebsite(); 
+        $countryID = $this->getCountryByWebsite();
         /**
         * I look for the ID corresponding to the commune selected in admin
         */
-        $storeCity = $this->scopeConfig->getValue('general/store_information/city',ScopeInterface::SCOPE_STORE); 
-        $cityOrigin= $blueservice->getGeolocation("{$storeCity}");
+        $storeCity = $this->scopeConfig->getValue('general/store_information/city',ScopeInterface::SCOPE_STORE);
+	    $comuOrigin= $blueservice->eliminarAcentos("{$storeCity}");
+        $cityOrigin= $blueservice->getGeolocation("{$comuOrigin}");
 
         /**
          * I get the product data
@@ -161,11 +161,24 @@ class ShippingPx extends AbstractCarrier implements CarrierInterface
                 $blueAlto = (int) $_product->getResource()
                     ->getAttributeRawValue($_product->getId(), 'alto', $_product->getStoreId());
 
+                if($blueAlto == '' || $blueAlto != 0){
+                    $blueAlto = 10;
+                }
+
                 $blueLargo = (int) $_product->getResource()
                     ->getAttributeRawValue($_product->getId(), 'largo', $_product->getStoreId());
 
+		        if($blueLargo == '' || $blueLargo != 0){
+                        $blueLargo = 10;
+                }
+
                 $blueAncho = (int) $_product->getResource()
-                    ->getAttributeRawValue($_product->getId(), 'ancho', $_product->getStoreId()); 
+                    ->getAttributeRawValue($_product->getId(), 'ancho', $_product->getStoreId());
+
+		        if($blueAncho == '' || $blueAncho != 0){
+                        $blueAncho = 10;
+                }
+
 
                 $itemProduct[] = [
                     'largo'         => $blueAlto,
@@ -178,18 +191,19 @@ class ShippingPx extends AbstractCarrier implements CarrierInterface
 
         /**
          * I look for the ID corresponding to the commune selected at checkout
-         */ 
-        $addressCity = $request->getDestCity(); 
+         */
+        $addressCity = $request->getDestCity();
         if($addressCity !=''){
-            $citydest= $blueservice->getGeolocation("{$addressCity}");
+		$comudest= $blueservice->eliminarAcentos("{$addressCity}");
+		$citydest= $blueservice->getGeolocation("{$comudest}");
             if($citydest){
                 /**
                 * I GENERATE THE ARRAY TO PASS IT TO THE API THAT WILL LOOK FOR THE PRICE
                 */
                 $seteoDatos = [
-                    "from" => [ "country" => "{$countryID}", "district" => "{$cityOrigin['district']}" ],
-                    "to" => [ "country" => "{$countryID}", "state" => "{$citydest['code']}", "district" => "{$citydest['district']}" ],
-                    "serviceType" => "EX",
+                    "from" => [ "country" => "{$countryID}", "district" => "{$cityOrigin['districtCode']}" ],
+                    "to" => [ "country" => "{$countryID}", "state" => "{$citydest['regionCode']}", "district" => "{$citydest['districtCode']}" ],
+                    "serviceType" => "MD",
                     "datosProducto" => [
                         "producto" => "P",
                         "familiaProducto" => "PAQU",
@@ -197,13 +211,13 @@ class ShippingPx extends AbstractCarrier implements CarrierInterface
                     ]
                 ];
 
-                $costoEnvio = $blueservice->getBXCosto($seteoDatos);    
+                $costoEnvio = $blueservice->getBXCosto($seteoDatos);
 
                 /*
-                * Formateamos los datos del JSON String
+                * We format the data of the JSON String
                 */
                 $json = json_decode($costoEnvio,true);
-                $costo = 1;
+		        $costo = 0;
                 foreach ($json as $key => $datos){
                     if($key == 'data'){
                         if(is_array($datos)){
@@ -213,13 +227,12 @@ class ShippingPx extends AbstractCarrier implements CarrierInterface
                             }else{
                                 $costo = -1;
                             }
-                            
                         }else{
                             $costo = -1;
                         }
                     }
                 }
-                
+
                 $result->append($method);
 
                 if($costo != -1){
@@ -227,13 +240,12 @@ class ShippingPx extends AbstractCarrier implements CarrierInterface
                 }else{
                     return false;
                 }
-
             }else{
                 return false;
             }
         }else{
             return false;
-        } 
+        }
     }
 
     /**
@@ -256,7 +268,7 @@ class ShippingPx extends AbstractCarrier implements CarrierInterface
             ScopeInterface::SCOPE_WEBSITES
         );
     }
-    
+
      /**
      * Returns value of given variable
      *
@@ -276,4 +288,5 @@ class ShippingPx extends AbstractCarrier implements CarrierInterface
 
         return $origValue;
     }
-} 
+}
+

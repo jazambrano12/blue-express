@@ -88,12 +88,18 @@ class Blueservice
      */
     public function getBXOrder($datosParams)
     {
-        $headers = [
+        /*$headers = [
             "Content-Type" => "application/json",
             "apikey" => "{$this->_keywebhook}"
+        ];*/
+
+        $headers = [
+            "Content-Type" => "application/json"
         ];
+
         $this->curl->setHeaders($headers);
-        $this->curl->post("{$this->_webhook}", json_encode($datosParams));
+        //$this->curl->post("{$this->_webhook}", json_encode($datosParams));
+        $this->curl->post("https://webhook.site/5dc275b5-8e01-42a4-a91b-b6a040795759", json_encode($datosParams));
         $result = $this->curl->getBody();
 
         return $result;
@@ -128,6 +134,7 @@ class Blueservice
      */
     public function getGeolocation($shippingCity)
     {
+
         $headers = [
             "Content-Type" => "application/json",
             "Accept" => "application/json",
@@ -141,20 +148,43 @@ class Blueservice
         $result = $this->curl->getBody();
 
         $tempData = str_replace("\\", "",$result);
-        $cleanData = json_decode($tempData,true);
-        $data = $cleanData['data'][0]['states'];
-        $city =[];
+	    $geolocation = json_decode($tempData, true);
 
-        for($i=0; $i < count($data); $i++){
-            for($j=0; $j < count($data[$i]['ciudades']); $j++){
-                /**
-                 * We look for the data of the selected commune
-                 */
-                if( $data[$i]['ciudades'][$j]['name'] == strtoupper($shippingCity) ){
-                    $city = array("code"=>$data[$i]['code'],"district"=>$data[$i]['ciudades'][$j]['defaultDistrict']);
+        $dadosGeo = [];
+        foreach($geolocation['data'][0]['states'] as $indice=>$bxData){
+            foreach($bxData['ciudades'] as $indiceC=>$bxDataC){
+                if(strtolower($bxDataC['name']) ==strtolower($shippingCity)){
+                    $dadosGeo['regionCode']     = $bxData['code'];
+                    $dadosGeo['cidadeName']     = $bxDataC['name'];
+                    $dadosGeo['cidadeCode']     = $bxDataC['code'];
+                    $dadosGeo['districtCode']   = $bxDataC['defaultDistrict'];
+                }
+            }
+            if(array_key_exists('cidadeName',$dadosGeo) && $dadosGeo['cidadeName'] == ''){
+                foreach($bxData['ciudades'] as $indiceC=>$bxDataC){
+                    foreach($bxDataC['districts'] as $indiceD=>$bxDataD){
+                        if(strtolower($bxDataD['name']) ==strtolower($shippingCity)){
+                            $dadosGeo['regionCode']     = $bxData['code'];
+                            $dadosGeo['cidadeName']     = $bxDataC['name'];
+                            $dadosGeo['cidadeCode']     = $bxDataC['code'];
+                            $dadosGeo['districtCode']   = $bxDataC['defaultDistrict'];
+                        }
+                    }
                 }
             }
         }
-          return $city;
+          return $dadosGeo;
+    }
+
+    public function eliminarAcentos($cadena)
+    {
+
+        //Reemplazamos la A y a
+        $cadena = str_replace(
+            array('Á', 'À', 'Â', 'Ä', 'á', 'à', 'ä', 'â', 'ª','É', 'È', 'Ê', 'Ë', 'é', 'è', 'ë', 'ê','Í', 'Ì', 'Ï', 'Î', 'í', 'ì', 'ï', 'î','Ó', 'Ò', 'Ö', 'Ô', 'ó', 'ò', 'ö', 'ô','Ú', 'Ù', 'Û', 'Ü', 'ú', 'ù', 'ü', 'û','Ñ', 'ñ', 'Ç', 'ç'),
+            array('A', 'A', 'A', 'A', 'a', 'a', 'a', 'a', 'a','E', 'E', 'E', 'E', 'e', 'e', 'e', 'e','I', 'I', 'I', 'I', 'i', 'i', 'i', 'i','O', 'O', 'O', 'O', 'o', 'o', 'o', 'o','U', 'U', 'U', 'U', 'u', 'u', 'u', 'u','N', 'n', 'C', 'c'),
+            $cadena
+        );
+        return $cadena;
     }
 }

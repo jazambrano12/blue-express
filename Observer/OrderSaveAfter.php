@@ -35,7 +35,7 @@ class OrderSaveAfter implements ObserverInterface
     public function __construct(
 	\Magento\Store\Model\StoreManagerInterface $storeManager,
         Blueservice $blueservice,
-	HelperBX $helperBX,
+	    HelperBX $helperBX,
         LoggerInterface $logger
     ){
         $this->_storeManager = $storeManager;
@@ -55,14 +55,38 @@ class OrderSaveAfter implements ObserverInterface
         $state          = $observer->getEvent()->getOrder()->getState();
 	    $weight_uni 	= $this->_weigthStore;
 
+	 /**
+         * I CONNECT TO THE SERVICE TO SEND THROUGH THE WEBHOOK
+         */
+        	$blueservice    = $this->_blueservice;
+
         /**
          * OBTAINING THE DETAIL OF THE ORDER
          */
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
         $orders = $objectManager->create('Magento\Sales\Model\Order')->load($orderID);
         $detailOrder = $orders->getData();
-	    $shipping = $orders->getShippingAddress();
-        If($shipping && $shipping->getEntityId()){
+        $shipping = $orders->getShippingAddress();
+        $shippingAddress = [];
+        $billingAddress = [];
+
+        If(isset($shipping) && $shipping->getEntityId()){
+
+		    $comuna = $blueservice->eliminarAcentos($shipping->getCity());
+            $destricCity = $blueservice->getGeolocation("{$comuna}");
+            if(isset($destricCity)){
+                $ShipiDistrict = $destricCity['districtCode'];
+                $shipiRegion = $destricCity['regionCode'];
+            }
+
+            $billing = $orders->getBillingAddress();
+            $comunaBilling = $blueservice->eliminarAcentos($billing->getCity());
+            $destricBillingCity = $blueservice->getGeolocation("{$comunaBilling}");
+            if(isset($destricCity)){
+                    $billiDistrict = $destricBillingCity['districtCode'];
+                    $billiRegion = $destricBillingCity['regionCode'];
+            }
+
             $shippingAddress = [
                 "entity_id"=> $shipping->getEntityID(),
                 "parent_id"=> $shipping->getParentId(),
@@ -72,7 +96,9 @@ class OrderSaveAfter implements ObserverInterface
                 "postcode"=> $shipping->getPostCode(),
                 "lastname"=> $shipping->getLastname(),
                 "street"=> $shipping->getStreet(),
-                "city"=> $shipping->getCity(),
+                "city"=> $blueservice->eliminarAcentos($shipping->getCity()),
+		        "district" => $ShipiDistrict,
+                "state" => $shipiRegion,
                 "email"=> $shipping->getEmail(),
                 "telephone"=> $shipping->getTelephone(),
                 "country_id"=> $shipping->getCountryId(),
@@ -80,7 +106,8 @@ class OrderSaveAfter implements ObserverInterface
                 "address_type"=> $shipping->getAddressType(),
                 "company"=> $shipping->getCompany()
             ];
-            $billing = $orders->getBillingAddress();
+
+	        $billing = $orders->getBillingAddress();
             $billingAddress = [
                 "entity_id"=> $billing->getEntityID(),
                 "parent_id"=> $billing->getParentId(),
@@ -90,7 +117,9 @@ class OrderSaveAfter implements ObserverInterface
                 "postcode"=> $billing->getPostCode(),
                 "lastname"=> $billing->getLastname(),
                 "street"=> $billing->getStreet(),
-                "city"=> $billing->getCity(),
+                "city"=> $blueservice->eliminarAcentos($billing->getCity()),
+		        "district" => $billiDistrict,
+                "state" => $billiRegion,
                 "email"=> $billing->getEmail(),
                 "telephone"=> $billing->getTelephone(),
                 "country_id"=> $billing->getCountryId(),
@@ -99,9 +128,36 @@ class OrderSaveAfter implements ObserverInterface
                 "company"=> $billing->getCompany()
             ];
         }
+
 	    $ProductDetail = array();
+	    $dimensiones = array();
+	    $objectManager  = \Magento\Framework\App\ObjectManager::getInstance();
+        $resource       = $objectManager->get(\Magento\Catalog\Model\ResourceModel\Product::class);
+
 	    foreach( $orders->getAllVisibleItems() as $item ) {
-	        $ProductDetail[] = $item->getData();
+
+	        $ProductDetail[]    = $item->getData();
+		    $alto               = $resource->getAttributeRawValue($resource->getIdBySku($item->getSku()), 'alto', 0);
+		    $ancho              = $resource->getAttributeRawValue($resource->getIdBySku($item->getSku()), 'ancho', 0);
+            $largo              = $resource->getAttributeRawValue($resource->getIdBySku($item->getSku()), 'largo', 0);
+
+            if(empty($alto) || $alto == 0){
+                $alto  = 10;
+            }
+
+		    if(empty($ancho) || $ancho == 0){
+                $ancho  = 10;
+            }
+
+		    if(empty($largo) || $largo == 0){
+                $largo  = 10;
+            }
+
+            $dimensiones[]  = [
+                "height"	=> $alto,
+                "width"		=> $ancho,
+                "large"		=> $largo
+           	];
 	    }
 
         /**
@@ -110,12 +166,22 @@ class OrderSaveAfter implements ObserverInterface
         $storeManager = $this->_storeManager;
         $baseUrl = $storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB);
 
-        /**
-         * I CONNECT TO THE SERVICE TO SEND THROUGH THE WEBHOOK
-         */
-        $blueservice    = $this->_blueservice;
+        if($state == 'processing' && ( $detailOrder['shipping_method'] =='bxexpress_bxexpress' || $detailOrder['shipping_method'] =='bxprioritario_bxprioritario' || $detailOrder['shipping_method'] == 'bxPremium_bxPremium' || $detailOrder['shipping_method'] == 'bxsameday_bxsameday')) {
+	        $typeCarrier = '';
+            switch ($detailOrder['shipping_method']){
+                case 'bxexpress_bxexpress':
+                    $typeCarrier = "EX";
+                    break;
+                case 'bxprioritario_bxprioritario':
+                    $typeCarrier = "PY";
+                    break;
+		        case 'bxsameday_bxsameday':
+                    $typeCarrier = "MD";
+                    break;
+                default:
+                $typeCarrier = "";
+            }
 
-        if($state == 'processing' && ( $detailOrder['shipping_method'] =='bxexpress_bxexpress' || $detailOrder['shipping_method'] =='bxprioritario_bxprioritario' || $detailOrder['shipping_method'] == 'bxPremium_bxPremium' )) {
             $pedido = [
                     "OrderId"       => $orderID,
                     "IncrementId"   => $incrementId,
@@ -123,14 +189,17 @@ class OrderSaveAfter implements ObserverInterface
                     "DetailOrder"   => $detailOrder,
                     "Shipping" 	    => $shippingAddress,
                     "Billing"	    => $billingAddress,
+		            "type_carrier"  => $typeCarrier,
                     "Product" 	    => $ProductDetail,
+		            "dimensions"    => $dimensiones,
                     "Origin"=>[
-                    "Account" => $baseUrl
+                        "Account" => $baseUrl
                     ]
             ];
 
-	        $this->logger->info('Information sent to the webhook',['Detalle' => $pedido]);
+	        $this->logger->info('Information sent to the webhook',['Detalle' => $destricCity]);
             $respuestaWebhook = $blueservice->getBXOrder($pedido);
        }
     }
 }
+

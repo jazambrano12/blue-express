@@ -14,8 +14,8 @@
             </bluexpress> 
             <bxprioritario>
                 <active>0</active>
-                <title>Blue Express - PT </title>
-                <name>Blue Express - PT </name> 
+                <title>Blue Express - PY </title>
+                <name>Blue Express - PY </name> 
                 <model>BlueExpress\ShippingBX\Model\Carrier\ShippingPt</model>
             </bxprioritario> 
             <bxexpress>
@@ -24,12 +24,12 @@
                 <name>Blue Express - EX </name> 
                 <model>BlueExpress\ShippingBX\Model\Carrier\ShippingEx</model>
             </bxexpress> 
-             <bxPremium>
+	    <bxsameday>
                 <active>0</active> 
-                <title>Blue Express - PY </title>
-                <name>Blue Express - PY</name> 
-                <model>BlueExpress\ShippingBX\Model\Carrier\ShippingPx</model>
-            </bxPremium> 
+                <title>Blue Express - MD </title>
+                <name>Blue Express - MD</name> 
+                <model>BlueExpress\ShippingBX\Model\Carrier\ShippingMd</model>
+            </bxsameday> 
         </carriers> 
     </default>
 </config>
