@@ -8,7 +8,7 @@ use Magento\Framework\App\Helper\AbstractHelper;
 /**
  * Class Data
  *
- * @package BlueExpress\ShippingBX\Helper
+ * @package Blue\Express\Helper
  */
 class Data extends AbstractHelper
 {
@@ -67,7 +67,7 @@ class Data extends AbstractHelper
     {
         return $this->_scopeConfig->getValue('carriers/bluexpress/bxurlprice', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
     }
-    
+
     /**
      * @return string
      */
